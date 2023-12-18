@@ -1,0 +1,135 @@
+// VARIABLES
+
+$height: 30px;
+
+$main-color: red;
+$secondary-color: white;
+
+$border-color: black;
+$border-width: 2px;
+
+$button-width: 12px;
+$button-border-width: 5px;
+$button-border-style: double;
+
+$default-rotation: -45deg;
+.pokeName {
+    color: white;
+    font-size: 20px;
+}
+.pokemon {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+#selectedPokemonsDisplay {
+    display: none;
+    width: 300px;
+    // height: 600px;
+    position: fixed;
+    right: 0;
+    top: 50px;
+    background-color: #242424;
+    border: 3px solid white;
+    border-top: none;
+    z-index: 1000;
+}
+#pokeballSection {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 100%;
+}
+#numberOfPokemonSelected {
+    color: white;
+    font-size: 20px;
+    font-weight: 900;
+    position: relative;
+    margin-right: 10px;
+}
+
+.navMenu {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 auto;
+    justify-content: space-between;
+    border-bottom: 3px solid white;
+}
+
+.navMenu a {
+    color: #f6f4e6;
+    text-decoration: none;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: inline-block;
+    width: 80px;
+    -webkit-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+}
+
+.pokeball {
+    // CAREFUL WITH NEWLINES AT INLINE-BLOCK
+    margin-right: 10px;
+    display: inline-block;
+    word-spacing: 10px;
+    box-sizing: border-box;
+    width: 30px;
+    height: $height;
+    border-radius: 100%;
+    background-color: $main-color;
+    border-style: solid;
+    border-width: $border-width;
+    position: relative;
+    transform: rotateZ($default-rotation);
+
+    &::before {
+        display: block;
+        content: "";
+        width: 0;
+        height: 0;
+        box-sizing: border-box;
+        border-color: transparent transparent $secondary-color $secondary-color;
+        border-width: 15px - $border-width;
+        border-radius: 100%;
+        border-style: solid;
+    }
+
+    &::after {
+        // button
+        content: "";
+        display: block;
+
+        box-sizing: border-box;
+        position: absolute;
+        background-color: $secondary-color;
+        top: calc(50% - #{$button-width}/ 2);
+        left: calc(50% - #{$button-width}/ 2);
+        width: $button-width;
+        height: $button-width;
+        border-width: $button-border-width;
+        border-style: $button-border-style;
+        border-color: $border-color;
+        position: absolute;
+        border-radius: 100%;
+    }
+
+    .pokeball-loader & {
+        animation: rotater;
+        animation-duration: 1s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+
+        @for $i from 1 through 10 {
+            &:nth-child(#{$i}) {
+                animation-delay: #{$i * 300}ms;
+            }
+        }
+    }
+}

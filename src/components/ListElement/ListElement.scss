@@ -1,0 +1,109 @@
+.pokeCard {
+    transition: transform 1.5s ease-in-out;
+    -webkit-animation: fadein 2s;
+    /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s;
+    /* Firefox < 16 */
+    -ms-animation: fadein 2s;
+    /* Internet Explorer */
+    -o-animation: fadein 2s;
+    /* Opera < 12.1 */
+    animation: fadein 2s;
+    cursor: pointer;
+    width: 180px;
+    height: 180px;
+    border-radius: 400px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 4px solid black;
+    &-top {
+        border-radius: 200px 200px 0 0;
+        height: 50%;
+        width: 100%;
+        background-color: rgba(177, 0, 0, 0.788);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        &-title {
+            color: rgb(255, 255, 255);
+            text-shadow: 2px 2px #000000;
+            font-size: 15px;
+            text-align: center;
+        }
+    }
+    &-middle {
+        &-stroke {
+            width: 100%;
+            height: 4px;
+            color: black;
+            background-color: black;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            &-img {
+                width: 80px;
+                height: 80px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: 4px solid black;
+                background-color: white;
+                border-radius: 100px;
+                filter: grayscale(40%);
+            }
+        }
+    }
+    &-bottom {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        &-title {
+            color: black;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+        }
+    }
+}
+
+.pokeCard:hover {
+    transform: rotate(360deg);
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Firefox < 16 */
+
+@-moz-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+
+@-webkit-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
