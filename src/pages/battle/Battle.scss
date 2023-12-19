@@ -1,0 +1,42 @@
+* {
+    color: white;
+}
+#playground {
+    position: absolute;
+    margin: 0 auto;
+    top: 100px;
+    width: 100%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    #battle {
+        width: 80%;
+        height: 80%;
+        display: flex;
+        flex-direction: row;
+        .playerSide {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            img {
+                width: 300px;
+            }
+        }
+        #playerSide1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+        }
+        #playerSide2 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+        }
+    }
+}

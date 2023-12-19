@@ -4,19 +4,40 @@ import Image from "react-bootstrap/Image";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Pokemon } from "../../interfaces/PokeApi.interface";
 import "./Detail.scss";
 import { Navbar } from "../../components/Navbar/Navbar";
 import { useEffect, useState } from "react";
 import { PokeApiRequests } from "../../helpers/pokedex-api.helper";
+import {
+    removeSelectedPokemon,
+    setSelectedPokemons,
+} from "../../store/slices/currentPokemon.slice";
 
 export const Detail = () => {
-    const { currentPokemon } = useSelector((state: any) => state.pokemonStore);
+    const { currentPokemon, selectedPokemons } = useSelector((state: any) => state.pokemonStore);
     const [descriptionStat, setDescription]: any[] = useState(undefined);
+    const dispatch = useDispatch();
+
     const getDescription = async () => {
         const { getPokemonCharacteristic } = PokeApiRequests();
         setDescription(await (await getPokemonCharacteristic(currentPokemon.id)).data);
+    };
+    const addPokemonToYourTeam = (pokemon: Pokemon) => {
+        if (
+            selectedPokemons &&
+            selectedPokemons.find((selectedPokemon: Pokemon) => selectedPokemon.id === pokemon.id)
+        )
+            return;
+        dispatch(setSelectedPokemons(pokemon));
+    };
+    const removePokemonFromYourTeam = (pokemon: Pokemon) => {
+        if (
+            selectedPokemons &&
+            selectedPokemons.find((selectedPokemon: Pokemon) => selectedPokemon.id === pokemon.id)
+        )
+            dispatch(removeSelectedPokemon(pokemon));
     };
     useEffect(() => {
         if (currentPokemon && currentPokemon.id) {
@@ -63,7 +84,11 @@ export const Detail = () => {
                                     style={{ padding: "30px", alignContent: "center" }}
                                 >
                                     {!!descriptionStat ? (
-                                        <p>{descriptionStat?.flavor_text_entries[0].flavor_text}</p>
+                                        <p>
+                                            {descriptionStat?.flavor_text_entries[0].flavor_text}.{" "}
+                                            {descriptionStat?.flavor_text_entries[2].flavor_text}{" "}
+                                            {descriptionStat?.flavor_text_entries[3].flavor_text}
+                                        </p>
                                     ) : (
                                         <div>LOADING</div>
                                     )}
@@ -83,18 +108,48 @@ export const Detail = () => {
                             </Row>
                         </Col>
                         <Col xs={6} md={6} lg={6}>
-                            <Row>
+                            <Row style={{ display: "flex", justifyContent: "center" }}>
                                 <Image
-                                    style={{ width: "90%" }}
+                                    style={{ width: "70%" }}
                                     src={currentPokemon.sprites.front_default}
                                 ></Image>
                             </Row>{" "}
                             <Row>
-                                <Col xs={6} md={6} lg={6}>
-                                    <Button variant="danger">Add</Button>
+                                <Col
+                                    xs={6}
+                                    md={6}
+                                    lg={6}
+                                    style={{ display: "flex", justifyContent: "center" }}
+                                >
+                                    <Button
+                                        disabled={selectedPokemons.find(
+                                            (selectedPokemon: Pokemon) =>
+                                                selectedPokemon.id === currentPokemon.id
+                                        )}
+                                        onClick={() => addPokemonToYourTeam(currentPokemon)}
+                                        variant="danger"
+                                    >
+                                        Add
+                                    </Button>
                                 </Col>
-                                <Col xs={6} md={6} lg={6}>
-                                    <Button variant="light">Remove</Button>
+                                <Col
+                                    xs={6}
+                                    md={6}
+                                    lg={6}
+                                    style={{ display: "flex", justifyContent: "center" }}
+                                >
+                                    <Button
+                                        disabled={
+                                            !selectedPokemons.find(
+                                                (selectedPokemon: Pokemon) =>
+                                                    selectedPokemon.id === currentPokemon.id
+                                            )
+                                        }
+                                        onClick={() => removePokemonFromYourTeam(currentPokemon)}
+                                        variant="light"
+                                    >
+                                        Remove
+                                    </Button>
                                 </Col>
                             </Row>
                         </Col>
@@ -103,7 +158,12 @@ export const Detail = () => {
                         {currentPokemon.moves.map((type: any, index: number) => {
                             if (index < 12) {
                                 return (
-                                    <Col xs={4} md={4} lg={4}>
+                                    <Col
+                                        style={{ padding: "30px", alignContent: "center" }}
+                                        xs={3}
+                                        md={3}
+                                        lg={3}
+                                    >
                                         Move{index + 1}: {type.move.name}
                                     </Col>
                                 );

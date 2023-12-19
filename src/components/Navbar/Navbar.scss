@@ -52,6 +52,7 @@ $default-rotation: -45deg;
 }
 
 .navMenu {
+    position: fixed;
     width: 100%;
     height: 50px;
     display: flex;
@@ -60,6 +61,7 @@ $default-rotation: -45deg;
     margin: 0 auto;
     justify-content: space-between;
     border-bottom: 1px solid white;
+    background-color: black;
 }
 
 .navMenu a {

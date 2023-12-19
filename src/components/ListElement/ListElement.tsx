@@ -8,11 +8,6 @@ interface PokemonElement {
 }
 export const ListElement: React.FC<PokemonElement> = ({ name, images, order, onClick }) => {
     return (
-        // <div>
-        //     <img src={url.front_default} />
-        //     <div>{name}</div>
-        // </div>
-
         <div className="pokeCard" onClick={() => onClick()}>
             <div className="pokeCard-top">
                 <div className="pokeCard-top-title">

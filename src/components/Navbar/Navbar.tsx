@@ -6,8 +6,10 @@ import {
     removeSelectedPokemon,
     setSelectedPokemons,
 } from "../../store/slices/currentPokemon.slice";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
+    const navigate = useNavigate();
     const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
     const dispatch = useDispatch();
 
@@ -16,7 +18,13 @@ export const Navbar = () => {
     return (
         <div>
             <nav className="navMenu">
-                <a href="#">Home</a>
+                <div>
+                    {" "}
+                    <a onClick={() => navigate(`/`)}>Home</a>
+                    {selectedPokemons.length > 0 ? (
+                        <a onClick={() => navigate(`/battle`)}>Battle!!!</a>
+                    ) : null}
+                </div>
 
                 <div
                     id="pokeballSection"
