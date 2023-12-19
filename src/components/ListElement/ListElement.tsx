@@ -4,7 +4,7 @@ interface PokemonElement {
     name: string;
     images: any;
     order: number;
-    onClick: any;
+    onClick?: any;
 }
 export const ListElement: React.FC<PokemonElement> = ({ name, images, order, onClick }) => {
     return (

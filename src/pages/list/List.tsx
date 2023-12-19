@@ -99,6 +99,10 @@ export const List = () => {
         });
     };
     const selectCurrentPokemon = (pokemon: Pokemon) => {
+        if (currentPokemon && currentPokemon.id === pokemon.id) return;
+        dispatch(setCurrentPokemon(pokemon));
+    };
+    const addPokemonToYourTeam = (pokemon: Pokemon) => {
         if (
             selectedPokemons &&
             selectedPokemons.find((selectedPokemon: Pokemon) => selectedPokemon.id === pokemon.id)
@@ -154,19 +158,20 @@ export const List = () => {
                                                 key={index}
                                             />
                                             <div id="buttonsSection">
-                                                <Button variant="danger">Danger</Button>{" "}
-                                                <button
+                                                <Button
                                                     key={`goToPokemon${pokemon.id}`}
                                                     onClick={() => goToPokemonDetail(pokemon)}
+                                                    variant="danger"
                                                 >
                                                     Detail
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     key={`selectPokemon${pokemon.id}`}
-                                                    onClick={() => selectCurrentPokemon(pokemon)}
+                                                    onClick={() => addPokemonToYourTeam(pokemon)}
+                                                    variant="light"
                                                 >
                                                     Add
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     );

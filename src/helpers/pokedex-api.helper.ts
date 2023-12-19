@@ -9,19 +9,24 @@ export const PokeApiRequests = () => {
         offset: number = 0,
         cancelToken: CancelTokenSource
     ) => {
-        return http.get(`${POKEAPI_URL}?limit=${limit}&offset=${offset}`, {
+        return http.get(`${POKEAPI_URL}pokemon?limit=${limit}&offset=${offset}`, {
             cancelToken: cancelToken.token,
         });
     };
     const getPokemonByNumber = async (value: number, cancelToken?: CancelTokenSource) => {
-        return http.get(`${POKEAPI_URL}${value}`, {
+        return http.get(`${POKEAPI_URL}pokemon/${value}`, {
             cancelToken: cancelToken?.token,
         });
     };
     const getPokemonByName = async (value: string, cancelToken?: CancelTokenSource) => {
-        return http.get(`${POKEAPI_URL}${value}`, {
+        return http.get(`${POKEAPI_URL}pokemon/${value}`, {
             cancelToken: cancelToken?.token,
         });
     };
-    return { getAllPokemons, getPokemonByNumber, getPokemonByName };
+    const getPokemonCharacteristic = async (value: string, cancelToken?: CancelTokenSource) => {
+        return http.get(`${POKEAPI_URL}pokemon-species/${value}`, {
+            cancelToken: cancelToken?.token,
+        });
+    };
+    return { getAllPokemons, getPokemonByNumber, getPokemonByName, getPokemonCharacteristic };
 };
