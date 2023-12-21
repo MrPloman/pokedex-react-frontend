@@ -1,5 +1,27 @@
 import { Pokemon } from "./PokeApi.interface";
 export type PlayerName = "player1" | "player2";
+export type actionType = "movement" | "change";
+export type PokemonTypes =
+    | "normal"
+    | "fighting"
+    | "flying"
+    | "poison"
+    | "ground"
+    | "rock"
+    | "bug"
+    | "ghost"
+    | "steel"
+    | "fire"
+    | "water"
+    | "grass"
+    | "electric"
+    | "psychic"
+    | "ice"
+    | "dragon"
+    | "dark"
+    | "fairy"
+    | "unknown"
+    | "shadow";
 
 export interface PokemonStatus extends Pokemon {
     health: number;
@@ -12,6 +34,6 @@ export interface Player {
 }
 
 export interface Turn {
-    turn: PlayerName;
+    turn: PlayerName | undefined;
     turnNumber: number;
 }

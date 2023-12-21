@@ -73,11 +73,24 @@
             }
         }
         #textSection {
+            display: flex;
+            flex-direction: row;
             align-self: center;
             justify-self: center;
             width: 80%;
             height: 300px;
             border: dotted 3px white;
+            #text {
+                width: 62%;
+            }
+            #actions {
+                border-left: dotted 3px white;
+                width: 38%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+            }
         }
     }
 }
