@@ -15,6 +15,7 @@ export interface BattleState {
         };
         text: { value: string; status: number };
     };
+    lastMovement: { name: string; url: string };
     loading: boolean;
     finished: boolean;
     winner: PlayerName | undefined;
@@ -32,7 +33,7 @@ export const battleSlice = createSlice({
         },
         turns: {
             turn: undefined,
-            turnNumber: 0,
+            turnNumber: 1,
         },
         actionsDisplay: {
             actions: {
@@ -43,6 +44,10 @@ export const battleSlice = createSlice({
                 },
             },
             text: { value: "", status: 0 },
+        },
+        lastMovement: {
+            name: "",
+            url: "",
         },
         loading: true,
         finished: false,
@@ -80,8 +85,39 @@ export const battleSlice = createSlice({
         ) => {
             if (!action.payload.name || !action.payload.id) return;
             state[action.payload.name].pokemons = state[action.payload.name].pokemons.filter(
+                (pokemonSaved: PokemonStatus) => pokemonSaved.id !== action.payload.id
+            );
+        },
+        injurePokemonPlayer: (
+            state: BattleState,
+            action: { payload: { id: number; name: PlayerName; injure: number }; type: string }
+        ) => {
+            if (!action.payload.name || !action.payload.id) return;
+            let pokemon = state[action.payload.name].pokemons.find(
                 (pokemonSaved: PokemonStatus) => pokemonSaved.id === action.payload.id
             );
+            if (!!pokemon && pokemon.health > 0) {
+                pokemon.health -= action.payload.injure;
+                state[action.payload.name].pokemons = [
+                    ...state[action.payload.name].pokemons.map((poke) => {
+                        if (poke.id === pokemon?.id) return pokemon;
+                        else return poke;
+                    }),
+                ];
+            }
+            if (!!pokemon && pokemon.health <= 0) {
+                pokemon.health = 0;
+                pokemon.defeated = true;
+                state[action.payload.name].pokemons = state[action.payload.name].pokemons.filter(
+                    (pok) => pok.id !== pokemon?.id
+                );
+                // state[action.payload.name].pokemons = [
+                //     ...state[action.payload.name].pokemons.map((poke) => {
+                //         if (poke.id === pokemon?.id) return pokemon;
+                //         else return poke;
+                //     }),
+                // ];
+            }
         },
         setActionsDisplay: (
             state: BattleState,
@@ -107,6 +143,12 @@ export const battleSlice = createSlice({
         updateTurn: (state: BattleState, action: { payload: number }) => {
             state.turns = { ...state.turns, turnNumber: action.payload };
         },
+        setLastMovement: (
+            state: BattleState,
+            action: { payload: { name: string; url: string } }
+        ) => {
+            state.lastMovement = action.payload;
+        },
     },
 });
 
@@ -119,5 +161,7 @@ export const {
     setActionsDisplay,
     setWhoGoesFirst,
     updateTurn,
+    injurePokemonPlayer,
+    setLastMovement,
 } = battleSlice.actions;
 export default battleSlice.reducer;

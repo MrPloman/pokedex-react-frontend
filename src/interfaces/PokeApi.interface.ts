@@ -1,3 +1,5 @@
+import { PokemonTypes } from "./LogicGame.interface";
+
 export interface Pokedex {
     pokemon: Pokemon[];
 }
@@ -20,7 +22,7 @@ export interface Pokemon {
     species: Species;
     sprites: Sprites;
     stats: Stat[];
-    types: Type[];
+    types: PokemonType[];
     weight: number;
 }
 
@@ -181,5 +183,9 @@ export interface Stat {
 
 export interface Type {
     slot: number;
-    type: Species;
+    type: { name: Type; url: string };
+}
+export interface PokemonType {
+    slot: number;
+    type: { name: PokemonTypes; url: string };
 }

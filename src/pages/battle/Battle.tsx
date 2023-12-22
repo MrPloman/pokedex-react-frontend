@@ -10,8 +10,15 @@ import { Button } from "react-bootstrap";
 import { PokemonStatus, actionType } from "../../interfaces/LogicGame.interface";
 
 export const Battle = () => {
-    const { init, nextText, handleMovementsDisplay, handleTeamsDisplay, reset, battleAction } =
-        UseLogicGame();
+    const {
+        init,
+        nextText,
+        handleMovementsDisplay,
+        handleTeamsDisplay,
+        reset,
+        battleAction,
+        slowerPokemonTurn,
+    } = UseLogicGame();
 
     const { player2, player1, loading, actionsDisplay } = useSelector(
         (state: any) => state.battleStore
@@ -28,6 +35,18 @@ export const Battle = () => {
     const handleTeamsDisplayection = () => {
         if (!actionsDisplay.actions.selected.team) handleTeamsDisplay(true);
         else handleTeamsDisplay(false);
+    };
+
+    const handleText = () => {
+        if (actionsDisplay.text.status === -1) {
+            nextText(actionsDisplay.text.status + 1, "");
+        } else if (actionsDisplay.text.status < 2 && actionsDisplay.text.status >= 0) {
+            nextText(actionsDisplay.text.status + 1, "");
+        } else if (actionsDisplay.text.status === 2) {
+            slowerPokemonTurn();
+        } else if (actionsDisplay.text.status === 3) {
+            nextText(1, "What will you do?");
+        }
     };
 
     const takeDecision = (type: actionType, movement?: any, pokemon?: PokemonStatus) => {
@@ -83,13 +102,7 @@ export const Battle = () => {
                                     </p>
                                     {!actionsDisplay.actions.show ? (
                                         <div>
-                                            <Button
-                                                onClick={() =>
-                                                    nextText(actionsDisplay.text.status + 1)
-                                                }
-                                            >
-                                                Next
-                                            </Button>
+                                            <Button onClick={() => handleText()}>Next</Button>
                                         </div>
                                     ) : null}
                                 </div>

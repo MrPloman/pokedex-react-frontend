@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Player, PokemonStatus, actionType } from "../interfaces/LogicGame.interface";
+import { Player, PlayerName, PokemonStatus, actionType } from "../interfaces/LogicGame.interface";
 import { useDispatch, useSelector } from "react-redux";
 import { PokeApiRequests } from "../helpers/pokedex-api.helper";
 import axios from "axios";
@@ -10,6 +10,10 @@ import {
     setLoading,
     setActionsDisplay,
     setWhoGoesFirst,
+    injurePokemonPlayer,
+    updateTurn,
+    setLastMovement,
+    defeatPokemonsPlayer,
 } from "../store/slices/battle.slice";
 import { GameLogic } from "../helpers/game-logic.helper";
 
@@ -17,7 +21,7 @@ export const UseLogicGame = () => {
     const { getDamage } = GameLogic();
     const { getPokemonByNumber } = PokeApiRequests();
     const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
-    const { player1, player2, loading, actionsDisplay, turns } = useSelector(
+    const { player1, player2, loading, actionsDisplay, turns, lastMovement } = useSelector(
         (state: any) => state.battleStore
     );
     const dispatch = useDispatch();
@@ -39,11 +43,6 @@ export const UseLogicGame = () => {
 
                 dispatch(setLoading({ loading: false }));
             }
-
-            // if (pokemonArray && pokemonArray.length === 6) {
-            //     dispatch(setPokemonsPlayer({ name: "player2", pokemons: pokemonArray }));
-            //     dispatch(setLoading({ loading: false }));
-            // }
         });
     };
     const reset = () => {
@@ -64,16 +63,28 @@ export const UseLogicGame = () => {
         );
     };
 
-    const nextText = (num: number, message?: string) => {
+    const nextText = (num: number, message: string) => {
         let actions = {
             show: false,
             selected: { movements: false, team: false },
         };
         let text = "";
-        if (num === 0) text = message ? message : `Player2 chooses ${player2[0].name}`;
+        if (num === -1) {
+            text = message;
+        }
+        if (num === 0) text = message ? message : `Player2 chooses ${player2.pokemons[0].name}`;
         if (num === 1) {
-            text = message ? message : "What would you do?";
+            text = message ? message : "What will you do?";
             actions.show = true;
+        }
+        if (num === 2) {
+            text = message && message;
+            actions.show = false;
+            actions.selected.movements = false;
+            actions.selected.team = false;
+        }
+        if (num === 3) {
+            text = message && message;
         }
 
         dispatch(
@@ -122,7 +133,7 @@ export const UseLogicGame = () => {
         return await pokemons;
     };
 
-    const battleAction = (action: {
+    const battleAction = async (action: {
         type: actionType;
         pokemon?: PokemonStatus;
         movement?: any;
@@ -130,7 +141,25 @@ export const UseLogicGame = () => {
         if (!action || !action.type) return;
         switch (action.type) {
             case "movement":
-                fight(action.movement);
+                dispatch(setLastMovement(action.movement));
+                dispatch(updateTurn(1));
+                if (
+                    player1.pokemons[0].stats.find((stat: any) => stat.stat.name === "speed")
+                        .base_stat >=
+                    player2.pokemons[0].stats.find((stat: any) => stat.stat.name === "speed")
+                        .base_stat
+                ) {
+                    await turnPlayer1(action.movement).then(() => {
+                        dispatch(updateTurn(2));
+                        // turnPlayer2();
+                    });
+                } else {
+                    await turnPlayer2().then(() => {
+                        dispatch(updateTurn(2));
+
+                        // turnPlayer1(action.movement);
+                    });
+                }
                 break;
             case "change":
                 break;
@@ -140,25 +169,106 @@ export const UseLogicGame = () => {
         }
     };
 
-    const fight = (movement: any) => {
-        if (
-            player1.pokemons[0].stats.find((stat: any) => stat.stat.name === "speed").base_stat >=
-            player2.pokemons[0].stats.find((stat: any) => stat.stat.name === "speed").base_stat
-        ) {
-            dispatch(setWhoGoesFirst("player1"));
-            getDamage(movement, player1.pokemons[0], player2.pokemons[0]);
-        } else {
+    const slowerPokemonTurn = () => {
+        if (turns.turnNumber !== 2) return;
+        if (turns.turn === "player1") {
             dispatch(setWhoGoesFirst("player2"));
-            getDamage(movement, player2.pokemons[0], player1.pokemons[0]);
+            turnPlayer2().then((value: any) => {
+                if (value) {
+                    nextText(
+                        3,
+                        `${player2.pokemons[0].name} used ${value.movement} with ${
+                            value.damage ? value.damage : 0
+                        } of damage`
+                    );
+                }
+            });
+        } else {
+            dispatch(setWhoGoesFirst("player1"));
+
+            turnPlayer1(lastMovement).then((value: any) => {
+                console.log(value);
+                if (value) {
+                    nextText(
+                        3,
+                        `${player1.pokemons[0].name} used ${lastMovement.name} with ${
+                            value.damage ? value.damage : 0
+                        } of damage`
+                    );
+                }
+            });
         }
+    };
 
-        // if (turns.turn && turns.turn === "player1") {
-        //     console.log("POKEMON1 VA PRIEMRO", movement);
-        // } else {
-        //     console.log("POKEMON2 VA PRIEMRO", movement);
-        // }
+    const turnPlayer2 = async () => {
+        dispatch(setWhoGoesFirst("player2"));
+        const movementNumber = Math.floor(Math.random() * 4) + 1;
+        const damage = await getDamage(
+            player2.pokemons[0].moves[movementNumber].move,
+            player2.pokemons[0],
+            player1.pokemons[0]
+        );
+        if (damage) {
+            let pokemons = player1.pokemons;
+            let pokemonDamaged = pokemons[0];
+            if (player1.pokemons[0].health - damage <= 0) {
+                defeatPokemon(player1.pokemons[0].id, "player1");
+            } else {
+                dispatch(
+                    injurePokemonPlayer({
+                        name: "player1",
+                        id: pokemonDamaged.id,
+                        injure: Math.round(damage),
+                    })
+                );
+                nextText(
+                    2,
+                    `${player2.pokemons[0].name} used ${
+                        player2.pokemons[0].moves[movementNumber].move.name
+                    } with ${Math.round(damage)}`
+                );
+            }
 
-        return;
+            return await {
+                movement: player2.pokemons[0].moves[movementNumber].move.name,
+                damage: Math.round(damage),
+            };
+        }
+    };
+
+    const turnPlayer1 = async (movement: any) => {
+        dispatch(setWhoGoesFirst("player1"));
+        const damage = await getDamage(movement, player1.pokemons[0], player2.pokemons[0]);
+        if (damage) {
+            let pokemons = player2.pokemons;
+            let pokemonDamaged = pokemons[0];
+            if (player2.pokemons[0].health - Math.round(damage) <= 0) {
+                defeatPokemon(player2.pokemons[0].id, "player2");
+            } else {
+                dispatch(
+                    injurePokemonPlayer({
+                        name: "player2",
+                        id: pokemonDamaged.id,
+                        injure: Math.round(damage),
+                    })
+                );
+                nextText(
+                    2,
+                    `${player1.pokemons[0].name} used ${movement.name} with ${Math.round(damage)}`
+                );
+            }
+            return await { movement: movement.name, damage: Math.round(damage) };
+        }
+    };
+
+    const defeatPokemon = (id: number, player: PlayerName) => {
+        if (player === "player1") {
+            nextText(-1, `${player1.pokemons[0].name} defeated`);
+            handleTeamsDisplay(true);
+        } else if (player === "player2") nextText(-1, `${player2.pokemons[0].name} defeated`);
+        dispatch(defeatPokemonsPlayer({ id, name: player }));
+        dispatch(setWhoGoesFirst("player1"));
+        dispatch(updateTurn(1));
     };
 
     return {
@@ -168,5 +278,6 @@ export const UseLogicGame = () => {
         handleTeamsDisplay,
         reset,
         battleAction,
+        slowerPokemonTurn,
     };
 };
