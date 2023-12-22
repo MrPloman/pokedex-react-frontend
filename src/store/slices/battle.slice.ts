@@ -16,6 +16,7 @@ export interface BattleState {
         text: { value: string; status: number };
     };
     lastMovement: { name: string; url: string };
+    processing: boolean;
     loading: boolean;
     finished: boolean;
     winner: PlayerName | undefined;
@@ -49,11 +50,18 @@ export const battleSlice = createSlice({
             name: "",
             url: "",
         },
+        processing: false,
         loading: true,
         finished: false,
         winner: undefined,
     },
     reducers: {
+        setProcessing: (
+            state: BattleState,
+            action: { payload: { processing: boolean }; type: string }
+        ) => {
+            state.processing = action.payload.processing;
+        },
         setLoading: (
             state: BattleState,
             action: { payload: { loading: boolean }; type: string }
@@ -111,12 +119,6 @@ export const battleSlice = createSlice({
                 state[action.payload.name].pokemons = state[action.payload.name].pokemons.filter(
                     (pok) => pok.id !== pokemon?.id
                 );
-                // state[action.payload.name].pokemons = [
-                //     ...state[action.payload.name].pokemons.map((poke) => {
-                //         if (poke.id === pokemon?.id) return pokemon;
-                //         else return poke;
-                //     }),
-                // ];
             }
         },
         setActionsDisplay: (
@@ -149,6 +151,10 @@ export const battleSlice = createSlice({
         ) => {
             state.lastMovement = action.payload;
         },
+        setWinner: (state: BattleState, action: { payload: { playerName: PlayerName } }) => {
+            state.winner = action.payload.playerName;
+            state.finished = true;
+        },
     },
 });
 
@@ -163,5 +169,7 @@ export const {
     updateTurn,
     injurePokemonPlayer,
     setLastMovement,
+    setProcessing,
+    setWinner,
 } = battleSlice.actions;
 export default battleSlice.reducer;

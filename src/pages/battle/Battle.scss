@@ -91,6 +91,27 @@
                 justify-content: space-around;
                 align-items: center;
             }
+            #movementsSelector {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                ul {
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: space-around;
+                    align-content: space-between;
+
+                    width: 80%;
+                    li {
+                        padding: 20px;
+                        font-size: 20px;
+                        cursor: pointer;
+                    }
+                }
+            }
         }
     }
 }

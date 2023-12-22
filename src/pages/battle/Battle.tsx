@@ -20,7 +20,7 @@ export const Battle = () => {
         slowerPokemonTurn,
     } = UseLogicGame();
 
-    const { player2, player1, loading, actionsDisplay } = useSelector(
+    const { player2, player1, loading, actionsDisplay, processing } = useSelector(
         (state: any) => state.battleStore
     );
     const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
@@ -50,6 +50,7 @@ export const Battle = () => {
     };
 
     const takeDecision = (type: actionType, movement?: any, pokemon?: PokemonStatus) => {
+        if (processing) return;
         if (type === "movement") battleAction({ type: "movement", pokemon: undefined, movement });
         if (type === "change") battleAction({ type: "change", pokemon: pokemon });
     };
@@ -73,40 +74,61 @@ export const Battle = () => {
                         <>
                             <div id="battle">
                                 <div className="playerSide" id="playerSide1">
-                                    <div className="pokemonStatus" id="pokemon2Status">
-                                        <div>{player2.pokemons[0].name}</div>
-                                        <ProgressBar
-                                            className="hpBar"
-                                            now={player2.pokemons[0].health}
-                                            variant="danger"
-                                        />
-                                    </div>
-                                    <img src={player1.pokemons[0].sprites.back_default} />
+                                    {player2 && player2.pokemons && player2.pokemons.length > 0 ? (
+                                        <div className="pokemonStatus" id="pokemon2Status">
+                                            <div>{player2.pokemons[0].name}</div>
+                                            <ProgressBar
+                                                className="hpBar"
+                                                now={player2.pokemons[0].health}
+                                                variant="danger"
+                                            />
+                                        </div>
+                                    ) : null}
+
+                                    {player1 && player1.pokemons && player1.pokemons.length > 0 ? (
+                                        <img src={player1.pokemons[0].sprites.back_default} />
+                                    ) : null}
                                 </div>
                                 <div className="playerSide" id="playerSide2">
-                                    <img src={player2.pokemons[0].sprites.front_default} />
-                                    <div className="pokemonStatus" id="pokemon1Status">
-                                        <div>{player1.pokemons[0].name}</div>
-                                        <ProgressBar
-                                            className="hpBar"
-                                            now={player1.pokemons[0].health}
-                                            variant="danger"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="textSection">
-                                <div id="text">
-                                    <p>
-                                        {actionsDisplay.text.value ? actionsDisplay.text.value : ""}
-                                    </p>
-                                    {!actionsDisplay.actions.show ? (
-                                        <div>
-                                            <Button onClick={() => handleText()}>Next</Button>
+                                    {player2 && player2.pokemons && player2.pokemons.length > 0 ? (
+                                        <img src={player2.pokemons[0].sprites.front_default} />
+                                    ) : null}
+                                    {player1 && player1.pokemons && player1.pokemons.length > 0 ? (
+                                        <div className="pokemonStatus" id="pokemon1Status">
+                                            <div>{player1.pokemons[0].name}</div>
+                                            <ProgressBar
+                                                className="hpBar"
+                                                now={player1.pokemons[0].health}
+                                                variant="danger"
+                                            />
                                         </div>
                                     ) : null}
                                 </div>
-                                {actionsDisplay.actions.show ? (
+                            </div>
+                            <div id="textSection">
+                                {processing ? (
+                                    <div>LOADING</div>
+                                ) : (
+                                    <div id="text">
+                                        <p>
+                                            {actionsDisplay.text.value
+                                                ? actionsDisplay.text.value
+                                                : ""}
+                                        </p>
+                                        {!actionsDisplay.actions.show ? (
+                                            <div>
+                                                <Button
+                                                    disabled={processing}
+                                                    onClick={() => handleText()}
+                                                >
+                                                    Next
+                                                </Button>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                )}
+
+                                {!processing && actionsDisplay.actions.show ? (
                                     <>
                                         {!actionsDisplay.actions.selected.movements &&
                                         !actionsDisplay.actions.selected.team ? (
@@ -155,6 +177,7 @@ export const Battle = () => {
                                                                                 type.move
                                                                             )
                                                                         }
+                                                                        key={index}
                                                                     >
                                                                         {" "}
                                                                         {type.move.name}
@@ -176,6 +199,7 @@ export const Battle = () => {
                                                         (pokemon: PokemonStatus) => {
                                                             return (
                                                                 <li
+                                                                    key={pokemon.id}
                                                                     onClick={() =>
                                                                         takeDecision(
                                                                             "change",
