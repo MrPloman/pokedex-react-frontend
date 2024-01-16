@@ -139,6 +139,26 @@ export const battleSlice = createSlice({
         ) => {
             state.actionsDisplay = action.payload;
         },
+        changePokemon: (
+            state: BattleState,
+            action: { payload: { pokemon: PokemonStatus; position: number } }
+        ) => {
+            console.log(action);
+            state.player1.pokemons = state.player1.pokemons.filter((pokemonInside, index) => {
+                if (index !== action.payload.position) return pokemonInside;
+            });
+            state.player1.pokemons = [action.payload.pokemon, ...state.player1.pokemons];
+            console.log(state.player1.pokemons);
+            // let firstPokemon = state.player1.pokemons[0];
+            // state.player1.pokemons[0] = action.payload.pokemon;
+            // state.player1.pokemons[action.payload.position] = firstPokemon;
+            // let pokemonFound = state.player1.pokemons.find(
+            //     (pok) => pok.id === action.payload.pokemon.id
+            // );
+            // if (pokemonFound) {
+            //     state.player1.pokemons[0];
+            // }
+        },
         setWhoGoesFirst: (state: BattleState, action: { payload: PlayerName }) => {
             state.turns = { ...state.turns, turn: action.payload };
         },
@@ -171,5 +191,6 @@ export const {
     setLastMovement,
     setProcessing,
     setWinner,
+    changePokemon,
 } = battleSlice.actions;
 export default battleSlice.reducer;

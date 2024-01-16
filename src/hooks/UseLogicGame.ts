@@ -16,10 +16,12 @@ import {
     defeatPokemonsPlayer,
     setProcessing,
     setWinner,
+    changePokemon,
 } from "../store/slices/battle.slice";
 import { GameLogic } from "../helpers/game-logic.helper";
 
 export const UseLogicGame = () => {
+    const LENGTH_POKEMONS_OPPONENT: number = 2;
     const { getDamage } = GameLogic();
     const { getPokemonByNumber } = PokeApiRequests();
     const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
@@ -34,7 +36,7 @@ export const UseLogicGame = () => {
         });
         dispatch(setPokemonsPlayer({ name: "player1", pokemons: player1Pokemons }));
         await getOpponentPokemons().then((pokemonArray: any) => {
-            if (pokemonArray && pokemonArray.length === 6) {
+            if (pokemonArray && pokemonArray.length === LENGTH_POKEMONS_OPPONENT) {
                 dispatch(setPokemonsPlayer({ name: "player2", pokemons: pokemonArray }));
                 dispatch(
                     setActionsDisplay({
@@ -48,34 +50,33 @@ export const UseLogicGame = () => {
         });
     };
     const reset = () => {
-        dispatch(
-            setActionsDisplay({
-                actions: {
-                    show: false,
-                    selected: {
-                        movements: false,
-                        team: false,
-                    },
-                },
-                text: {
-                    value: "",
-                    status: 0,
-                },
-            })
-        );
+        dispatch(setLoading({ loading: false }));
+        // dispatch(
+        //     setActionsDisplay({
+        //         actions: {
+        //             show: false,
+        //             selected: {
+        //                 movements: false,
+        //                 team: false,
+        //             },
+        //         },
+        //         text: {
+        //             value: "",
+        //             status: 0,
+        //         },
+        //     })
+        // );
     };
 
     const nextText = (num: number, message: string) => {
+        console.table({ num, message });
         let actions = {
             show: false,
             selected: { movements: false, team: false },
         };
         let text = "";
-        if (num === -2) {
-            text = message;
-        }
-        if (num === -1) {
-            text = message;
+        if (num === -2 || num === -1 || num === 3 || num === 4) {
+            text = message && message;
         }
         if (num === 0) text = message ? message : `Player2 chooses ${player2.pokemons[0].name}`;
         if (num === 1) {
@@ -88,8 +89,11 @@ export const UseLogicGame = () => {
             actions.selected.movements = false;
             actions.selected.team = false;
         }
-        if (num === 3) {
-            text = message && message;
+        if (num === 5) {
+            text = "Game Finished";
+            actions.show = false;
+            actions.selected.movements = false;
+            actions.selected.team = false;
         }
         dispatch(setProcessing({ processing: false }));
         dispatch(
@@ -130,7 +134,7 @@ export const UseLogicGame = () => {
     const getOpponentPokemons = async () => {
         const cancelToken = axios.CancelToken.source();
         let pokemons: PokemonStatus[] = [];
-        for (let index = 0; index < 6; index++) {
+        for (let index = 0; index < LENGTH_POKEMONS_OPPONENT; index++) {
             const number = Math.floor(Math.random() * 1000) + 1;
             const pokemon = await getPokemonByNumber(number, cancelToken);
             pokemons = [...pokemons, { ...pokemon.data, health: 100, defeated: false }];
@@ -141,6 +145,7 @@ export const UseLogicGame = () => {
     const battleAction = async (action: {
         type: actionType;
         pokemon?: PokemonStatus;
+        position?: number;
         movement?: any;
     }) => {
         if (!action || !action.type) return;
@@ -168,6 +173,12 @@ export const UseLogicGame = () => {
                 }
                 break;
             case "change":
+                if (action.pokemon && action.position) {
+                    dispatch(changePokemon({ pokemon: action.pokemon, position: action.position }));
+                    // dispatch(
+
+                    await turnPlayer2().then(() => {});
+                }
                 break;
 
             default:
@@ -181,33 +192,24 @@ export const UseLogicGame = () => {
             dispatch(setWhoGoesFirst("player2"));
             turnPlayer2().then((value: any) => {
                 if (value) {
-                    if (checkIfThisIsTheLastAlivePokemon("player1")) {
-                        nextText(-2, `Game finished, player1 is defeated`);
-                    } else {
-                        nextText(
-                            3,
-                            `${player2.pokemons[0].name} used ${value.movement} with ${
-                                value.damage ? value.damage : 0
-                            } of damage`
-                        );
-                    }
+                    nextText(
+                        3,
+                        `${player2.pokemons[0].name} used ${value.movement} with ${
+                            value.damage ? value.damage : 0
+                        } of damage`
+                    );
                 }
             });
         } else {
             dispatch(setWhoGoesFirst("player1"));
-
             turnPlayer1(lastMovement).then((value: any) => {
                 if (value) {
-                    if (checkIfThisIsTheLastAlivePokemon("player2")) {
-                        nextText(-2, `Game finished, player1 is defeated`);
-                    } else {
-                        nextText(
-                            3,
-                            `${player1.pokemons[0].name} used ${lastMovement.name} with ${
-                                value.damage ? value.damage : 0
-                            } of damage`
-                        );
-                    }
+                    nextText(
+                        3,
+                        `${player1.pokemons[0].name} used ${lastMovement.name} with ${
+                            value.damage ? value.damage : 0
+                        } of damage`
+                    );
                 }
             });
         }
@@ -226,25 +228,27 @@ export const UseLogicGame = () => {
             let pokemons = player1.pokemons;
             let pokemonDamaged = pokemons[0];
             if (player1.pokemons[0].health - damage <= 0) {
-                defeatPokemon(player1.pokemons[0].id, "player1");
+                await defeatPokemon(pokemonDamaged.id, "player1");
+                await nextText(
+                    4,
+                    `${player2.pokemons[0].name} used ${
+                        player2.pokemons[0].moves[movementNumber].move.name
+                    } with ${Math.round(damage)} and defeated the opponent`
+                );
             } else {
-                dispatch(
+                await dispatch(
                     injurePokemonPlayer({
                         name: "player1",
                         id: pokemonDamaged.id,
                         injure: Math.round(damage),
                     })
                 );
-                if (checkIfThisIsTheLastAlivePokemon("player1")) {
-                    nextText(-2, `Game finished, player1 is defeated`);
-                } else {
-                    nextText(
-                        2,
-                        `${player2.pokemons[0].name} used ${
-                            player2.pokemons[0].moves[movementNumber].move.name
-                        } with ${Math.round(damage)}`
-                    );
-                }
+                await nextText(
+                    2,
+                    `${player2.pokemons[0].name} used ${
+                        player2.pokemons[0].moves[movementNumber].move.name
+                    } with ${Math.round(damage)}`
+                );
             }
 
             return await {
@@ -261,60 +265,52 @@ export const UseLogicGame = () => {
             let pokemons = player2.pokemons;
             let pokemonDamaged = pokemons[0];
             if (player2.pokemons[0].health - Math.round(damage) <= 0) {
-                defeatPokemon(player2.pokemons[0].id, "player2");
+                await defeatPokemon(pokemonDamaged.id, "player2");
+                await nextText(
+                    4,
+                    `${player1.pokemons[0].name} used ${movement.name} with ${Math.round(
+                        damage
+                    )} and defeated the opponent`
+                );
             } else {
-                dispatch(
+                await dispatch(
                     injurePokemonPlayer({
                         name: "player2",
                         id: pokemonDamaged.id,
                         injure: Math.round(damage),
                     })
                 );
-                if (checkIfThisIsTheLastAlivePokemon("player1")) {
-                    nextText(-2, `Game finished, player2 is defeated`);
-                } else {
-                    nextText(
-                        2,
-                        `${player1.pokemons[0].name} used ${movement.name} with ${Math.round(
-                            damage
-                        )}`
-                    );
-                }
+                await nextText(
+                    2,
+                    `${player1.pokemons[0].name} used ${movement.name} with ${Math.round(damage)}`
+                );
             }
+
             return await { movement: movement.name, damage: Math.round(damage) };
         }
     };
 
-    const defeatPokemon = (id: number, player: PlayerName) => {
-        dispatch(defeatPokemonsPlayer({ id, name: player }));
-
-        if (player === "player1") {
-            nextText(-1, `${player1.pokemons[0].name} defeated`);
-
-            handleTeamsDisplay(true);
-        } else if (player === "player2") nextText(-1, `${player2.pokemons[0].name} defeated`);
-        dispatch(setWhoGoesFirst("player1"));
-        dispatch(updateTurn(1));
-        // } else {
-        //     nextText(-1, `Game finished, ${player} is defeated`);
-        // }
+    const defeatPokemon = async (id: number, player: PlayerName) => {
+        await dispatch(defeatPokemonsPlayer({ id, name: player }));
+        await dispatch(setWhoGoesFirst("player1"));
+        await dispatch(updateTurn(1));
+        return await true;
     };
 
-    const checkIfThisIsTheLastAlivePokemon = (playerName: PlayerName) => {
-        if (
-            (playerName === "player1" && player1.pokemons.length === 0) ||
-            (playerName === "player2" && player2.pokemons.length === 0)
-        ) {
-            dispatch(setWinner({ playerName }));
+    const checkIfThisIsTheLastAlivePokemon = () => {
+        if (player1.pokemons.length === 0) {
+            dispatch(setWinner({ playerName: "player2" }));
             return true;
-        } else {
-            return false;
-        }
+        } else if (player2.pokemons.length === 0) {
+            dispatch(setWinner({ playerName: "player1" }));
+            return true;
+        } else return false;
     };
 
     return {
         init,
         nextText,
+        checkIfThisIsTheLastAlivePokemon,
         handleMovementsDisplay,
         handleTeamsDisplay,
         reset,

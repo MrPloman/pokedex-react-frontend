@@ -18,9 +18,10 @@ export const Battle = () => {
         reset,
         battleAction,
         slowerPokemonTurn,
+        checkIfThisIsTheLastAlivePokemon,
     } = UseLogicGame();
 
-    const { player2, player1, loading, actionsDisplay, processing } = useSelector(
+    const { player2, player1, loading, actionsDisplay, processing, winner } = useSelector(
         (state: any) => state.battleStore
     );
     const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
@@ -46,13 +47,27 @@ export const Battle = () => {
             slowerPokemonTurn();
         } else if (actionsDisplay.text.status === 3) {
             nextText(1, "What will you do?");
+        } else if (actionsDisplay.text.status === 4) {
+            if (!checkIfThisIsTheLastAlivePokemon()) {
+                nextText(1, "");
+            } else {
+                nextText(5, "Game Over");
+            }
+        } else if (actionsDisplay.text.status === 5) {
+            navigate("list");
         }
     };
 
-    const takeDecision = (type: actionType, movement?: any, pokemon?: PokemonStatus) => {
+    const takeDecision = (
+        type: actionType,
+        movement?: any,
+        position?: number,
+        pokemon?: PokemonStatus
+    ) => {
         if (processing) return;
         if (type === "movement") battleAction({ type: "movement", pokemon: undefined, movement });
-        if (type === "change") battleAction({ type: "change", pokemon: pokemon });
+        if (type === "change")
+            battleAction({ type: "change", position: position, pokemon: pokemon });
     };
 
     useEffect(() => {
@@ -196,7 +211,7 @@ export const Battle = () => {
                                                 </span>
                                                 <ul>
                                                     {player1.pokemons.map(
-                                                        (pokemon: PokemonStatus) => {
+                                                        (pokemon: PokemonStatus, index: number) => {
                                                             return (
                                                                 <li
                                                                     key={pokemon.id}
@@ -204,6 +219,7 @@ export const Battle = () => {
                                                                         takeDecision(
                                                                             "change",
                                                                             undefined,
+                                                                            index,
                                                                             pokemon
                                                                         )
                                                                     }
