@@ -34,10 +34,29 @@
                     height: 20%;
                     border: 2px solid white;
                     display: flex;
-                    justify-content: center;
-                    .hpBar {
+                    justify-content: space-evenly;
+                    align-items: center;
+                    flex-direction: column;
+                    .pokemonName {
                         width: 80%;
-                        align-self: center;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                    }
+                    .hpStatus {
+                        width: 80%;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+
+                        .hpBar {
+                            width: 70%;
+                            align-self: center;
+                        }
+                        .hpData {
+                            width: 20%;
+                            font-size: 10px;
+                        }
                     }
                 }
                 img {
@@ -81,7 +100,8 @@
             height: 300px;
             border: dotted 3px white;
             #text {
-                width: 62%;
+                width: 80%;
+                padding: 20px 30px;
             }
             #actions {
                 border-left: dotted 3px white;
@@ -107,7 +127,7 @@
                     width: 80%;
                     li {
                         padding: 20px;
-                        font-size: 20px;
+                        font-size: 15px;
                         cursor: pointer;
                     }
                 }

@@ -30,8 +30,11 @@
         &-title {
             color: rgb(255, 255, 255);
             text-shadow: 2px 2px #000000;
-            font-size: 15px;
+            margin-top: 15px;
             text-align: center;
+            h3 {
+                font-size: 20px;
+            }
         }
     }
     &-middle {
@@ -66,8 +69,9 @@
         margin-top: 40px;
         &-title {
             color: black;
-            font-size: 12px;
+            font-size: 10px;
             margin: 0;
+            margin-top: 10px;
             padding: 0;
         }
     }

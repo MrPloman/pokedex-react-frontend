@@ -159,6 +159,7 @@ export const List = () => {
                                             />
                                             <div id="buttonsSection">
                                                 <Button
+                                                    className="buttonAction"
                                                     key={`goToPokemon${pokemon.id}`}
                                                     onClick={() => goToPokemonDetail(pokemon)}
                                                     variant="danger"
@@ -166,6 +167,7 @@ export const List = () => {
                                                     Detail
                                                 </Button>
                                                 <Button
+                                                    className="buttonAction"
                                                     key={`selectPokemon${pokemon.id}`}
                                                     onClick={() => addPokemonToYourTeam(pokemon)}
                                                     variant="light"

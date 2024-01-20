@@ -57,21 +57,26 @@ export const Detail = () => {
                                     xs={12}
                                     md={12}
                                     lg={12}
-                                    style={{ padding: "30px", alignContent: "center" }}
+                                    style={{
+                                        padding: "30px",
+                                        alignContent: "center",
+                                        marginTop: "150px",
+                                    }}
                                 >
                                     {currentPokemon.name}
                                 </Col>
                             </Row>
 
                             <Row>
-                                {currentPokemon.types.map((type: any) => (
+                                {currentPokemon.types.map((type: any, index: number) => (
                                     <Col
+                                        key={index}
                                         xs={6}
                                         md={6}
                                         lg={6}
                                         style={{ padding: "30px", alignContent: "center" }}
                                     >
-                                        <span>Type</span>
+                                        <span>Type </span>
                                         {type.slot} : {type.type.name}
                                     </Col>
                                 ))}
@@ -95,8 +100,9 @@ export const Detail = () => {
                                 </Col>
                             </Row>
                             <Row>
-                                {currentPokemon.stats.map((stat: any) => (
+                                {currentPokemon.stats.map((stat: any, index: any) => (
                                     <Col
+                                        key={index}
                                         xs={4}
                                         md={4}
                                         lg={4}
@@ -108,7 +114,13 @@ export const Detail = () => {
                             </Row>
                         </Col>
                         <Col xs={6} md={6} lg={6}>
-                            <Row style={{ display: "flex", justifyContent: "center" }}>
+                            <Row
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    marginTop: "100px",
+                                }}
+                            >
                                 <Image
                                     style={{ width: "70%" }}
                                     src={currentPokemon.sprites.front_default}
@@ -159,6 +171,7 @@ export const Detail = () => {
                             if (index < 12) {
                                 return (
                                     <Col
+                                        key={index}
                                         style={{ padding: "30px", alignContent: "center" }}
                                         xs={3}
                                         md={3}

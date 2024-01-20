@@ -39,6 +39,7 @@ export const Battle = () => {
     };
 
     const handleText = () => {
+        if (processing) return;
         if (actionsDisplay.text.status === -1) {
             nextText(actionsDisplay.text.status + 1, "");
         } else if (actionsDisplay.text.status < 2 && actionsDisplay.text.status >= 0) {
@@ -55,6 +56,8 @@ export const Battle = () => {
             }
         } else if (actionsDisplay.text.status === 5) {
             navigate("list");
+        } else if (actionsDisplay.text.status === 6) {
+            slowerPokemonTurn();
         }
     };
 
@@ -91,12 +94,21 @@ export const Battle = () => {
                                 <div className="playerSide" id="playerSide1">
                                     {player2 && player2.pokemons && player2.pokemons.length > 0 ? (
                                         <div className="pokemonStatus" id="pokemon2Status">
-                                            <div>{player2.pokemons[0].name}</div>
-                                            <ProgressBar
-                                                className="hpBar"
-                                                now={player2.pokemons[0].health}
-                                                variant="danger"
-                                            />
+                                            <div className="pokemonName">
+                                                {player2.pokemons[0].name.toUpperCase()}{" "}
+                                                <span>lv 50</span>
+                                            </div>
+                                            <div className="hpStatus">
+                                                <span className="hpData">
+                                                    {player2.pokemons[0].health}/100
+                                                </span>
+
+                                                <ProgressBar
+                                                    className="hpBar"
+                                                    now={player2.pokemons[0].health}
+                                                    variant="danger"
+                                                />
+                                            </div>
                                         </div>
                                     ) : null}
 
@@ -110,12 +122,20 @@ export const Battle = () => {
                                     ) : null}
                                     {player1 && player1.pokemons && player1.pokemons.length > 0 ? (
                                         <div className="pokemonStatus" id="pokemon1Status">
-                                            <div>{player1.pokemons[0].name}</div>
-                                            <ProgressBar
-                                                className="hpBar"
-                                                now={player1.pokemons[0].health}
-                                                variant="danger"
-                                            />
+                                            <div className="pokemonName">
+                                                {player1.pokemons[0].name.toUpperCase()}{" "}
+                                                <span>lv 50</span>
+                                            </div>
+                                            <div className="hpStatus">
+                                                <span className="hpData">
+                                                    {player1.pokemons[0].health}/100
+                                                </span>
+                                                <ProgressBar
+                                                    className="hpBar"
+                                                    now={player1.pokemons[0].health}
+                                                    variant="danger"
+                                                />
+                                            </div>
                                         </div>
                                     ) : null}
                                 </div>
@@ -131,14 +151,13 @@ export const Battle = () => {
                                                 : ""}
                                         </p>
                                         {!actionsDisplay.actions.show ? (
-                                            <div>
-                                                <Button
-                                                    disabled={processing}
-                                                    onClick={() => handleText()}
-                                                >
-                                                    Next
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                disabled={processing}
+                                                onClick={() => handleText()}
+                                                variant="danger"
+                                            >
+                                                Next
+                                            </Button>
                                         ) : null}
                                     </div>
                                 )}
@@ -215,14 +234,16 @@ export const Battle = () => {
                                                             return (
                                                                 <li
                                                                     key={pokemon.id}
-                                                                    onClick={() =>
-                                                                        takeDecision(
-                                                                            "change",
-                                                                            undefined,
-                                                                            index,
-                                                                            pokemon
-                                                                        )
-                                                                    }
+                                                                    onClick={() => {
+                                                                        if (index !== 0) {
+                                                                            takeDecision(
+                                                                                "change",
+                                                                                undefined,
+                                                                                index,
+                                                                                pokemon
+                                                                            );
+                                                                        }
+                                                                    }}
                                                                 >
                                                                     {" "}
                                                                     {pokemon.name}

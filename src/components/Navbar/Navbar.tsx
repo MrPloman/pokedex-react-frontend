@@ -19,11 +19,11 @@ export const Navbar = () => {
     return (
         <div>
             <nav className="navMenu">
-                <div>
+                <div id="leftSide">
                     {" "}
                     <a onClick={() => navigate(`/`)}>Home</a>
                     {selectedPokemons.length > 0 ? (
-                        <a onClick={() => navigate(`/battle`)}>Battle!!!</a>
+                        <a onClick={() => navigate(`/battle`)}>Fight</a>
                     ) : null}
                 </div>
 
