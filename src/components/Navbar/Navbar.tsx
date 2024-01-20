@@ -1,20 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Navbar.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { Pokemon } from "../../interfaces/PokeApi.interface";
 import {
     removeSelectedPokemon,
+    setCurrentPokemon,
     setSelectedPokemons,
 } from "../../store/slices/currentPokemon.slice";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
     const navigate = useNavigate();
-    const { selectedPokemons } = useSelector((state: any) => state.pokemonStore);
+    const { selectedPokemons, currentPokemon } = useSelector((state: any) => state.pokemonStore);
     const dispatch = useDispatch();
     const location = useLocation();
 
     const [style, setStyle] = useState({ display: "none" });
+    const selectCurrentPokemon = (pokemon: Pokemon) => {
+        if (currentPokemon && currentPokemon.id === pokemon.id) return;
+        dispatch(setCurrentPokemon(pokemon));
+    };
+    const goToPokemonDetail = (pokemon: Pokemon) => {
+        // if (currentPokemon && currentPokemon.id === pokemon.id) return;
+        // dispatch(setCurrentPokemon(pokemon));
+        // console.log(pokemon);
+        selectCurrentPokemon(pokemon);
+        if (location.pathname !== "/detail") navigate(`detail`);
+    };
+    useEffect(() => {
+        if (!currentPokemon) navigate("/");
+    }, []);
 
     return (
         <div>
@@ -55,9 +70,17 @@ export const Navbar = () => {
             >
                 {selectedPokemons.map((pokeball: Pokemon) => {
                     return (
-                        <div className="pokemon" key={pokeball.id} id={pokeball.name}>
+                        <div
+                            style={{ cursor: "pointer" }}
+                            onClick={() => {
+                                goToPokemonDetail(pokeball);
+                            }}
+                            className="pokemon"
+                            key={pokeball.id}
+                            id={pokeball.name}
+                        >
                             <img src={pokeball.sprites.front_default} alt={pokeball.name} />
-                            <span className="pokeName">{pokeball.name}</span>
+                            <span className="pokeName">{pokeball.name.toUpperCase()}</span>
                             <span
                                 onClick={() => dispatch(removeSelectedPokemon(pokeball))}
                                 style={{
